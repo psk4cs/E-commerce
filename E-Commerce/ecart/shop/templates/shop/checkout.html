@@ -1,0 +1,111 @@
+{% extends 'shop/basic.html' %}
+{% block title %} Track Order{% endblock %}
+{% block body %}
+<div class="container">
+  <div class="col my-3">
+    <h2>Step 1 -> Review Your Cart Items | Awesome Cart</h2>
+    <div>
+      <ul class="list-group" id="cartItems">
+            <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
+              A list item
+              <span class="badge badge-primary badge-pill">14</span>
+            </li> -->
+      </ul>
+      <div class="justify-content-between align-items-center my-3" id="priceView">
+
+      </div>
+    </div>
+    </div>
+      <div class="col my-4">
+        <h2>Step 2 -> Enter Your Address & Other Details </h2>
+        <div>
+          <form method="post" action="/shop/checkout/">{% csrf_token %}
+            <input type="hidden" name="order_json" id="order_json">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="inputEmail4">Email</label>
+                <input type="email" class="form-control" id="inputEmail4" placeholder="Enter Your Email:" name="email">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="inputPhone">Phone</label>
+                <input type="tel" class="form-control" id="inputPhone" placeholder="Enter Phone No:" name="phone">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="inputName">Name</label>
+              <input type="text" class="form-control" id="inputName" placeholder="Enter your Full Name:" name="name">
+            </div>
+            <div class="form-group">
+              <label for="inputAddress">Address</label>
+              <input type="text" class="form-control" id="inputAddress" placeholder="1223, Main St" name="add1">
+            </div>
+            <div class="form-group">
+              <label for="inputAddress2">Address 2</label>
+              <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor" name="add2">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="inputCity">City</label>
+                <input type="text" class="form-control" id="inputCity" name="city">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="inputState">State</label>
+                <input type="text" class="form-control" id="inputState" name="state">
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputZip">Zip</label>
+                <input type="text" class="form-control" id="inputZip" name="zip_code">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary form-group">Place Order</button>
+
+          </form>
+        </div>
+      </div>
+  </div>
+
+
+{% endblock %}
+
+{% block js %}
+    <script>
+      if(localStorage.getItem('cart')==null){
+        var cart={};
+      }
+      else{
+        cart=JSON.parse(localStorage.getItem('cart'))
+      }
+    var sum=0;
+    var total_price=0;
+      if ($.isEmptyObject(cart)){
+        myStr=`<li class="list-group-item d-flex justify-content-between align-items-center">
+        Add to Cart Your Product First Then Check Out Your Added Product
+        </li>`
+        $('#cartItems').append(myStr);
+      }  
+      else{
+        for(var item in cart){
+          let qty=cart[item][0];
+          let name=cart[item][1];
+          let basePrice=cart[item][2];
+          let price=qty*basePrice;
+          sum=sum+qty;
+          total_price=total_price+price;
+          myStr=`<li class="list-group-item d-flex justify-content-between align-items-center">
+          ${name} <span>The Base Price is: RS.<b>${basePrice}</b></span>
+          <span class="badge badge-primary badge-pill">${qty}</span>
+          </li>`;
+          $('#cartItems').append(myStr);
+        }
+        pricestr=`<p>Total Price For Added Items is: <b>RS. <span>${total_price}</span> </b><p>`;
+        $('#priceView').append(pricestr);
+      }
+      document.getElementById('cart').innerHTML=sum;
+      $('#order_json').val(JSON.stringify(cart));
+      {% if thank %}
+        alert('Thanks For Shopping With Us!!Your Order Id is {{id}}.');
+        localStorage.clear();
+        document.location='/shop';
+      {% endif %}
+    </script>
+{% endblock %}
